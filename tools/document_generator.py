@@ -16,6 +16,7 @@ import logging
 
 from config.settings import settings
 from .base import BaseTool
+from llm_utils import message_to_text
 
 logger = logging.getLogger(__name__)
 
@@ -67,8 +68,11 @@ class DocumentGeneratorTool(BaseTool):
         elif settings.DASHSCOPE_API_KEY:
             import os as os_module
             os_module.environ["DASHSCOPE_API_KEY"] = settings.DASHSCOPE_API_KEY
-            from langchain_community.llms import Tongyi
-            self._llm = Tongyi(model_name=settings.LLM_MODEL_NAME)
+            from langchain_community.chat_models import ChatTongyi
+            self._llm = ChatTongyi(
+                model_name=settings.LLM_MODEL_NAME,
+                model_kwargs={"temperature": settings.LLM_TEMPERATURE}
+            )
 
     def _generate_content_with_llm(self, doc_type: str, context: str) -> Dict[str, Any]:
         """使用 LLM 智能生成文档内容"""
@@ -112,7 +116,7 @@ class DocumentGeneratorTool(BaseTool):
         prompt = prompts.get(doc_type, prompts["report"])
 
         try:
-            response = self._llm.invoke(prompt)
+            response = message_to_text(self._llm.invoke(prompt))
             match = re.search(r'\{[^{}]*\}', response, re.DOTALL)
             if match:
                 return json.loads(match.group())

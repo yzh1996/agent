@@ -6,7 +6,8 @@ from typing import List, Dict, Any, Optional
 import json
 import logging
 
-from langchain_community.llms import Tongyi
+from langchain_community.chat_models import ChatTongyi
+from llm_utils import message_to_text
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +15,7 @@ logger = logging.getLogger(__name__)
 class Reflection:
     """反思器 - 分析失败原因并生成替代策略"""
     
-    def __init__(self, llm: Optional[Tongyi] = None):
+    def __init__(self, llm: Optional[ChatTongyi] = None):
         self.llm = llm
         self.max_retries = 3
     
@@ -45,7 +46,7 @@ class Reflection:
 确保只返回有效的JSON。"""
         
         try:
-            response = self.llm.invoke(prompt)
+            response = message_to_text(self.llm.invoke(prompt))
             # 提取JSON对象
             start = response.find('{')
             end = response.rfind('}') + 1
@@ -102,7 +103,7 @@ class Reflection:
 
 请返回一个新的任务步骤列表，JSON数组格式。"""
             try:
-                response = self.llm.invoke(prompt)
+                response = message_to_text(self.llm.invoke(prompt))
                 start = response.find('[')
                 end = response.rfind(']') + 1
                 if start != -1 and end > start:
@@ -124,7 +125,7 @@ class Reflection:
 
 总结："""
             try:
-                return self.llm.invoke(prompt).strip()
+                return message_to_text(self.llm.invoke(prompt)).strip()
             except Exception as e:
                 logger.error(f"LLM反思总结失败: {e}")
         

@@ -11,7 +11,8 @@ from .base import BaseTool
 from knowledge import KnowledgeRetriever
 from knowledge.embeddings import get_embeddings
 # 推荐使用 langchain_huggingface，但为避免额外依赖，先继续用社区版，仅修复 deprecation 警告
-from langchain_community.llms import Tongyi
+from langchain_community.chat_models import ChatTongyi
+from llm_utils import message_to_text
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +61,10 @@ class KnowledgeQATool(BaseTool):
             if settings.DASHSCOPE_API_KEY:
                 import os
                 os.environ["DASHSCOPE_API_KEY"] = settings.DASHSCOPE_API_KEY
-                self._llm = Tongyi(model_name=settings.LLM_MODEL_NAME)
+                self._llm = ChatTongyi(
+                    model_name=settings.LLM_MODEL_NAME,
+                    model_kwargs={"temperature": settings.LLM_TEMPERATURE}
+                )
                 logger.info("通义千问LLM初始化成功")
             else:
                 logger.warning("未配置DASHSCOPE_API_KEY，将使用检索内容直接返回")
@@ -103,7 +107,7 @@ class KnowledgeQATool(BaseTool):
 请用专业、清晰的语言回答，并在回答末尾注明参考来源。"""
                 
                 response = self._llm.invoke(prompt)
-                answer = response.strip()
+                answer = message_to_text(response).strip()
                 
                 # 添加来源信息（如果LLM未包含）
                 if "来源" not in answer and "参考资料" not in answer:

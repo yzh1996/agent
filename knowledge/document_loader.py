@@ -7,7 +7,7 @@ from typing import List, Optional
 import logging
 
 from langchain_core.documents import Document
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 import fitz  # PyMuPDF
 from docx import Document as DocxDocument
 import pandas as pd

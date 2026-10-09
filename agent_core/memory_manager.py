@@ -10,6 +10,7 @@ import logging
 
 from storage import RedisClient, MySQLClient
 from config.settings import settings
+from llm_utils import message_to_text
 
 logger = logging.getLogger(__name__)
 
@@ -161,7 +162,7 @@ class MemoryManager:
 摘要："""
         
         try:
-            summary = llm.invoke(prompt)
+            summary = message_to_text(llm.invoke(prompt))
             self.set_preference(f"session:{session_id}", "summary", summary)
             return summary.strip()
         except Exception as e:

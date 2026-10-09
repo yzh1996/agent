@@ -158,7 +158,7 @@ if mode == "💬 智能对话":
                 if result.get("intermediate_steps"):
                     with st.expander("📋 查看执行步骤", expanded=False):
                         for i, step in enumerate(result["intermediate_steps"], 1):
-                            # 兼容元组格式（ReAct）和字典格式（规划器）
+                            # 兼容结构化工具调用和规划器的步骤格式
                             if isinstance(step, tuple):
                                 action, obs = step[0], step[1]
                                 tool_name = action.tool

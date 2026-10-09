@@ -6,8 +6,9 @@
 from typing import List, Dict, Any, Optional
 import json
 import logging
-from langchain_community.llms import Tongyi
+from langchain_community.chat_models import ChatTongyi
 from config.settings import settings
+from llm_utils import message_to_text
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +16,7 @@ logger = logging.getLogger(__name__)
 class TaskPlanner:
     """任务规划器 - 将复杂任务拆解为可执行的步骤"""
 
-    def __init__(self, llm: Optional[Tongyi] = None):
+    def __init__(self, llm: Optional[ChatTongyi] = None):
         self.llm = llm
 
     def plan(self, user_input: str, available_tools: List[str]) -> List[Dict[str, Any]]:
@@ -49,7 +50,7 @@ class TaskPlanner:
 确保输出有效的JSON数组，不要包含任何额外文字。"""
 
         try:
-            response = self.llm.invoke(prompt)
+            response = message_to_text(self.llm.invoke(prompt))
             start = response.find('[')
             end = response.rfind(']') + 1
             if start != -1 and end > start:
